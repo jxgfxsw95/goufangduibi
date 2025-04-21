@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态购房方案对比（最终调整版）</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .note {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #36c;
+            margin: 20px 0;
+        }
+        .highlight {
+            background-color: #fffacd;
+        }
+        .input-cell {
+            background-color: #e6f7ff;
+        }
+        .red-bold {
+            color: red;
+            font-weight: bold;
+        }
+        input {
+            width: 90%;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        .center-text {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>动态婚前婚后购房对比分析（最终调整版）</h1>
+    <div class="note">
+        <p><strong>使用说明：</strong></p>
+        <ul>
+            <li>在"首付金额"和"贷款总额"栏分别输入婚前和婚后方案的金额</li>
+            <li>女方公积金冲抵金额已调整为2,272元/月</li>
+            <li>表格将自动计算并显示两种方案的所有相关数据</li>
+            <li>红色加粗数字表示关键对比数据</li>
+            <li>点击下方按钮可下载当前数据的Excel表格</li>
+        </ul>
+    </div>
+
+    <h2>购房方案动态对比</h2>
+    <table id="comparisonTable">
+        <thead>
+            <tr>
+                <th>项目</th>
+                <th>婚前购买（男方名义）</th>
+                <th>婚后购买（夫妻共同）</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>购房资格</td>
+                <td>男方首套资格</td>
+                <td>家庭第二套</td>
+            </tr>
+            <tr class="input-cell">
+                <td>首付金额（万元）</td>
+                <td><input type="number" id="preMaritalDownPayment" value="350" min="0" step="10"></td>
+                <td><input type="number" id="maritalDownPayment" value="350" min="0" step="10"></td>
+            </tr>
+            <tr class="input-cell">
+                <td>贷款总额（万元）</td>
+                <td><input type="number" id="preMaritalLoan" value="350" min="0" step="10"></td>
+                <td><input type="number" id="maritalLoan" value="350" min="0" step="10"></td>
+            </tr>
+            <tr>
+                <td>房屋总价</td>
+                <td id="preMaritalTotalPrice">700万元</td>
+                <td id="maritalTotalPrice">700万元</td>
+            </tr>
+            <tr class="highlight">
+                <td>公积金贷款额度</td>
+                <td id="preMaritalFund">80万元（65+15）</td>
+                <td id="maritalFund">80万元（男方额度）</td>
+            </tr>
+            <tr>
+                <td>商业贷款额度</td>
+                <td id="preMaritalCommercial">270万元</td>
+                <td id="maritalCommercial">270万元</td>
+            </tr>
+            <tr>
+                <td>公积金贷款利率</td>
+                <td>2.85%（首套）</td>
+                <td>3.25%（二套）</td>
+            </tr>
+            <tr>
+                <td>商业贷款利率</td>
+                <td>3.15%（首套）</td>
+                <td>3.55%（二套）</td>
+            </tr>
+            <tr>
+                <td>公积金月供</td>
+                <td id="preMaritalFundPayment">3,308元</td>
+                <td id="maritalFundPayment">3,481元</td>
+            </tr>
+            <tr>
+                <td>商业贷款月供</td>
+                <td id="preMaritalCommercialPayment">11,601元</td>
+                <td id="maritalCommercialPayment">12,201元</td>
+            </tr>
+            <tr>
+                <td>合计月供（第一年）</td>
+                <td id="preMaritalTotalPayment">14,909元</td>
+                <td id="maritalTotalPayment">15,682元</td>
+            </tr>
+            <tr class="highlight">
+                <td>实际月供（公积金冲抵后）</td>
+                <td id="preMaritalActualPayment">14,909 - 8,000 = <span class="red-bold">6,909元</span>（仅男方）<br>
+                    领证后：6,909 - 2,272 = <span class="red-bold">4,637元</span></td>
+                <td id="maritalActualPayment">15,682 - (8,000+2,272) = <span class="red-bold">5,410元</span></td>
+            </tr>
+            <tr>
+                <td>30年总还款额</td>
+                <td id="preMaritalTotalRepayment">5,367,240元</td>
+                <td id="maritalTotalRepayment">5,645,520元</td>
+            </tr>
+            <tr>
+                <td>购房总成本</td>
+                <td id="preMaritalTotalCost">8,867,240元</td>
+                <td id="maritalTotalCost">9,145,520元</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="center-text">
+                    婚后购买比婚前购买月供多 <span id="paymentDiff" class="red-bold">773元</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="button" onclick="exportToExcel()">下载Excel表格</button>
+
+    <script>
+        // 计算月供函数
+        function calculatePayment(principal, annualRate, years) {
+            const monthlyRate = annualRate / 12 / 100;
+            const payments = years * 12;
+            return principal * monthlyRate * Math.pow(1 + monthlyRate, payments) / (Math.pow(1 + monthlyRate, payments) - 1);
+        }
+
+        // 格式化金额
+        function formatCurrency(num) {
+            return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+        }
+
+        // 更新表格数据
+        function updateTable() {
+            const preMaritalDownPayment = parseFloat(document.getElementById('preMaritalDownPayment').value) * 10000;
+            const maritalDownPayment = parseFloat(document.getElementById('maritalDownPayment').value) * 10000;
+            const preMaritalLoan = parseFloat(document.getElementById('preMaritalLoan').value) * 10000;
+            const maritalLoan = parseFloat(document.getElementById('maritalLoan').value) * 10000;
+            
+            // 计算房屋总价
+            const preMaritalTotalPrice = preMaritalDownPayment + preMaritalLoan;
+            const maritalTotalPrice = maritalDownPayment + maritalLoan;
+            
+            const preMaritalFund = 800000;
+            const maritalFund = 800000;
+            
+            // 计算商业贷款
+            const preMaritalCommercial = preMaritalLoan - preMaritalFund;
+            const maritalCommercial = maritalLoan - maritalFund;
+            
+            // 计算月供
+            const preMaritalFundPayment = calculatePayment(preMaritalFund, 2.85, 30);
+            const maritalFundPayment = calculatePayment(maritalFund, 3.25, 30);
+            const preMaritalCommercialPayment = calculatePayment(preMaritalCommercial, 3.15, 30);
+            const maritalCommercialPayment = calculatePayment(maritalCommercial, 3.55, 30);
+            
+            // 计算总额
+            const preMaritalTotalPayment = preMaritalFundPayment + preMaritalCommercialPayment;
+            const maritalTotalPayment = maritalFundPayment + maritalCommercialPayment;
+            
+            // 计算实际月供（女方公积金冲抵调整为2,272元）
+            const preMaritalActualFirstYear = preMaritalTotalPayment - 8000;
+            const preMaritalActualAfterMarry = preMaritalActualFirstYear - 2272;
+            const maritalActual = maritalTotalPayment - (8000 + 2272);
+            
+            // 计算总还款额
+            const preMaritalTotalRepayment = (preMaritalFundPayment + preMaritalCommercialPayment) * 360;
+            const maritalTotalRepayment = (maritalFundPayment + maritalCommercialPayment) * 360;
+            
+            // 更新表格
+            document.getElementById('preMaritalTotalPrice').textContent = formatCurrency(preMaritalTotalPrice) + '元';
+            document.getElementById('maritalTotalPrice').textContent = formatCurrency(maritalTotalPrice) + '元';
+            document.getElementById('preMaritalFund').textContent = '80万元（65+15）';
+            document.getElementById('maritalFund').textContent = '80万元（男方额度）';
+            document.getElementById('preMaritalCommercial').textContent = formatCurrency(preMaritalCommercial) + '元';
+            document.getElementById('maritalCommercial').textContent = formatCurrency(maritalCommercial) + '元';
+            document.getElementById('preMaritalFundPayment').textContent = formatCurrency(preMaritalFundPayment) + '元';
+            document.getElementById('maritalFundPayment').textContent = formatCurrency(maritalFundPayment) + '元';
+            document.getElementById('preMaritalCommercialPayment').textContent = formatCurrency(preMaritalCommercialPayment) + '元';
+            document.getElementById('maritalCommercialPayment').textContent = formatCurrency(maritalCommercialPayment) + '元';
+            document.getElementById('preMaritalTotalPayment').textContent = formatCurrency(preMaritalTotalPayment) + '元';
+            document.getElementById('maritalTotalPayment').textContent = formatCurrency(maritalTotalPayment) + '元';
+            document.getElementById('preMaritalActualPayment').innerHTML = formatCurrency(preMaritalTotalPayment) + ' - 8,000 = <span class="red-bold">' + formatCurrency(preMaritalActualFirstYear) + '元</span>（仅男方）<br>领证后：' + formatCurrency(preMaritalActualFirstYear) + ' - 2,272 = <span class="red-bold">' + formatCurrency(preMaritalActualAfterMarry) + '元</span>';
+            document.getElementById('maritalActualPayment').innerHTML = formatCurrency(maritalTotalPayment) + ' - (8,000+2,272) = <span class="red-bold">' + formatCurrency(maritalActual) + '元</span>';
+            document.getElementById('preMaritalTotalRepayment').textContent = formatCurrency(preMaritalTotalRepayment) + '元';
+            document.getElementById('maritalTotalRepayment').textContent = formatCurrency(maritalTotalRepayment) + '元';
+            document.getElementById('preMaritalTotalCost').textContent = formatCurrency(preMaritalDownPayment + preMaritalTotalRepayment) + '元';
+            document.getElementById('maritalTotalCost').textContent = formatCurrency(maritalDownPayment + maritalTotalRepayment) + '元';
+            document.getElementById('paymentDiff').textContent = formatCurrency(maritalActual - preMaritalActualAfterMarry) + '元';
+        }
+
+        // 初始化表格
+        document.getElementById('preMaritalDownPayment').addEventListener('input', updateTable);
+        document.getElementById('maritalDownPayment').addEventListener('input', updateTable);
+        document.getElementById('preMaritalLoan').addEventListener('input', updateTable);
+        document.getElementById('maritalLoan').addEventListener('input', updateTable);
+        updateTable();
+
+        // 导出Excel
+        function exportToExcel() {
+            const table = document.getElementById('comparisonTable');
+            const workbook = XLSX.utils.table_to_book(table);
+            XLSX.writeFile(workbook, '最终版购房方案对比.xlsx');
+        }
+    </script>
+</body>
+</html>
